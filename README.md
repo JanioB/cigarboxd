@@ -38,7 +38,7 @@ Recommended production additions:
 
 ## Environment
 
-Create `.env.local` for development or `.env.production` for the live server from [.env.example](./.env.example).
+Create `.env.local` for development or `.env.production` for a live deploy from [.env.example](./.env.example).
 
 Required client variables:
 
@@ -63,8 +63,9 @@ INITIAL_ADMIN_EMAIL=
 
 Notes:
 
-- `FIREBASE_ADMIN_PRIVATE_KEY` must preserve newline escapes, for example `-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n`.
+- `FIREBASE_ADMIN_PRIVATE_KEY` must preserve newline escapes, for example `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.
 - The first account registered with `INITIAL_ADMIN_EMAIL` becomes the bootstrap admin if no admin exists yet.
+- `NEXT_PUBLIC_APP_URL` is the recommended canonical URL. For Netlify, server-rendered metadata can also fall back to `URL` or `DEPLOY_PRIME_URL`, but setting `NEXT_PUBLIC_APP_URL` explicitly is cleaner.
 
 ## Local development
 
@@ -84,7 +85,61 @@ npm run seed:fda
 
 ## Deployment
 
-The app is configured for self-hosted production:
+The repo supports both Netlify and self-hosted deployments.
+
+### Netlify
+
+This repo now includes [netlify.toml](./netlify.toml) with explicit build settings:
+
+- build command: `npm run build`
+- publish directory: `.next`
+- Node.js: `22`
+- skew protection enabled via `NETLIFY_NEXT_SKEW_PROTECTION=true`
+
+Set these variables in the Netlify dashboard for the site:
+
+- `NEXT_PUBLIC_API_KEY`
+- `NEXT_PUBLIC_AUTH_DOMAIN`
+- `NEXT_PUBLIC_PROJECT_ID`
+- `NEXT_PUBLIC_STORAGE_BUCKET`
+- `NEXT_PUBLIC_MESSAGING_ID`
+- `NEXT_PUBLIC_APP_ID`
+- `NEXT_PUBLIC_APP_URL`
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `FIREBASE_ADMIN_CLIENT_EMAIL`
+- `FIREBASE_ADMIN_PRIVATE_KEY`
+- `INITIAL_ADMIN_EMAIL`
+
+Important:
+
+- Netlify does not read `.env.local` or `.env.production` from your machine. Add the values in the Netlify UI.
+- The public catalog endpoints still depend on Firebase Admin credentials because the app keeps Firestore server-only.
+- A deploy does not seed Firestore. The cigarette catalog stays empty until you import it.
+
+Recommended Netlify flow:
+
+1. Connect the repository to a Netlify site.
+2. Confirm the build command is `npm run build` and the publish directory is `.next`.
+3. Add every environment variable listed above.
+4. Trigger a fresh deploy.
+5. Verify `https://your-domain.example/api/health` and `https://your-domain.example/api/ready`.
+6. Run the FDA seed script once against the production Firebase project.
+
+To seed production data from a trusted machine:
+
+```bash
+node --env-file=.env.production scripts/seed-fda-cigarettes.mjs
+```
+
+You can also export the production variables in your shell and run:
+
+```bash
+node scripts/seed-fda-cigarettes.mjs
+```
+
+### Self-hosted production
+
+The app is also configured for self-hosted production:
 
 - `next.config.ts` uses `output: "standalone"` for production packaging
 - `Dockerfile` builds and runs the standalone server
@@ -94,8 +149,6 @@ The app is configured for self-hosted production:
 - `/api/ready` verifies env and Firestore connectivity for readiness checks
 - `deploy/nginx/cigarboxxd.conf.example` shows a reverse-proxy setup for a real domain
 - `deploy/systemd/cigarboxxd-compose.service.example` shows a boot-time service wrapper
-
-### Production server flow
 
 Assumption below:
 
@@ -169,7 +222,7 @@ Recommended production layout:
 1. Run the Next app on a private port such as `127.0.0.1:3000`.
 2. Put Nginx or Caddy in front of it for TLS termination and domain routing.
 3. Use the example config in `deploy/nginx/cigarboxxd.conf.example`.
-4. Point your DNS `A`/`AAAA` record to the server and issue TLS certificates with Let’s Encrypt.
+4. Point your DNS `A`/`AAAA` record to the server and issue TLS certificates with Let's Encrypt.
 
 Example Nginx and certificate rollout:
 
@@ -206,10 +259,9 @@ Run it after Firebase Admin credentials are configured:
 npm run seed:fda
 ```
 
-On the live server:
+On a live deployment or any other environment without `.env.local`, use explicit environment variables instead:
 
 ```bash
-cd /opt/cigarboxxd
 node --env-file=.env.production scripts/seed-fda-cigarettes.mjs
 ```
 

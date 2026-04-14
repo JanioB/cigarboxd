@@ -11,10 +11,20 @@ const serverEnv = [
   "FIREBASE_ADMIN_PROJECT_ID",
   "FIREBASE_ADMIN_CLIENT_EMAIL",
   "FIREBASE_ADMIN_PRIVATE_KEY",
-  "NEXT_PUBLIC_APP_URL",
 ];
 
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.APP_URL ||
+  process.env.URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  "";
+
 const missing = [...publicEnv, ...serverEnv].filter((name) => !process.env[name]);
+
+if (!appUrl) {
+  missing.push("NEXT_PUBLIC_APP_URL (or APP_URL/URL/DEPLOY_PRIME_URL)");
+}
 
 if (missing.length) {
   console.error("Missing required runtime environment variables:");

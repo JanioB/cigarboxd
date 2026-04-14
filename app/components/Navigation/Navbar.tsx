@@ -106,7 +106,7 @@ export default function Navbar() {
               />
               <button
                 type="submit"
-                className="graphik rounded-full border border-b-grey px-4 py-2 text-xs uppercase tracking-[0.18em] text-sh-grey hover:border-hov-blue hover:text-p-white"
+                className="graphik whitespace-nowrap rounded-full border border-b-grey px-4 py-2 text-xs uppercase tracking-[0.18em] text-sh-grey hover:border-hov-blue hover:text-p-white"
               >
                 Search
               </button>
@@ -131,7 +131,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/auth"
-                className="graphik inline-flex rounded-full bg-b-green px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-si-black"
+                className="graphik inline-flex min-w-[108px] items-center justify-center whitespace-nowrap rounded-full bg-b-green px-5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-si-black"
               >
                 Sign in
               </Link>

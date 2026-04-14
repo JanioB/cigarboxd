@@ -49,23 +49,23 @@ export default function AuthPage() {
         <div className="grid w-full gap-8 md:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-5">
             <p className="graphik text-xs font-semibold uppercase tracking-[0.24em] text-sh-grey">
-              Access control
+              Your account
             </p>
             <h1 className="tiempos text-4xl text-p-white md:text-5xl">
-              Sign in or create a controlled review account.
+              Sign in or create your account.
             </h1>
             <p className="max-w-[52ch] text-base leading-7 text-l-white">
-              Registration is server-validated, respects the email blacklist, and can bootstrap the first administrator when
-              `INITIAL_ADMIN_EMAIL` matches the new account.
+              Join the catalog, keep track of cigarettes you&apos;ve tried, and publish reviews in a
+              moderated community.
             </p>
           </div>
 
           <div className="rounded-2xl border border-b-grey bg-review-bg/70 p-6">
-            <div className="mb-6 flex gap-3">
+            <div className="mb-6 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className={`graphik rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                className={`graphik whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
                   mode === "signin" ? "bg-b-green text-si-black" : "border border-b-grey text-p-white"
                 }`}
               >
@@ -74,7 +74,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => setMode("register")}
-                className={`graphik rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                className={`graphik whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
                   mode === "register" ? "bg-hov-blue text-si-black" : "border border-b-grey text-p-white"
                 }`}
               >
@@ -123,7 +123,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="graphik rounded-full bg-b-green px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-si-black disabled:opacity-60"
+                className="graphik inline-flex items-center justify-center whitespace-nowrap rounded-full bg-b-green px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-si-black disabled:opacity-60"
               >
                 {isLoading ? "Working..." : mode === "signin" ? "Sign in" : "Register"}
               </button>
@@ -135,4 +135,3 @@ export default function AuthPage() {
     </>
   );
 }
-

@@ -29,6 +29,8 @@ type AppAuthContextValue = {
 };
 
 const AppAuthContext = createContext<AppAuthContextValue | null>(null);
+const AUTH_UNAVAILABLE_MESSAGE = "Authentication is temporarily unavailable.";
+const REGISTRATION_UNAVAILABLE_MESSAGE = "Registration is temporarily unavailable.";
 
 const readResponseError = async (response: Response) => {
   const payload = await response.json().catch(() => null);
@@ -64,7 +66,7 @@ export const AppAuthProvider = ({ children }: { children: React.ReactNode }) => 
     init?: RequestInit
   ) => {
     if (!auth) {
-      throw new Error("Firebase client configuration is missing.");
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE);
     }
 
     const currentUser = auth.currentUser;
@@ -116,7 +118,7 @@ export const AppAuthProvider = ({ children }: { children: React.ReactNode }) => 
 
   const login = async (email: string, password: string) => {
     if (!auth) {
-      throw new Error("Firebase client configuration is missing.");
+      throw new Error(AUTH_UNAVAILABLE_MESSAGE);
     }
 
     setIsLoading(true);
@@ -136,7 +138,7 @@ export const AppAuthProvider = ({ children }: { children: React.ReactNode }) => 
 
   const register = async (payload: RegisterPayload) => {
     if (!auth) {
-      throw new Error("Firebase client configuration is missing.");
+      throw new Error(REGISTRATION_UNAVAILABLE_MESSAGE);
     }
 
     setIsLoading(true);

@@ -9,10 +9,12 @@ import { CigaretteRecord } from "@/lib/types";
 export const CigaretteCatalogPage = ({ search }: { search: string }) => {
   const [items, setItems] = useState<CigaretteRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
+
       try {
         const query = new URLSearchParams();
         query.set("limit", "120");
@@ -23,8 +25,17 @@ export const CigaretteCatalogPage = ({ search }: { search: string }) => {
         const response = await fetch(`/api/cigarettes?${query.toString()}`, {
           cache: "no-store",
         });
+
+        if (!response.ok) {
+          throw new Error("The catalog is temporarily unavailable right now.");
+        }
+
         const payload = await response.json();
         setItems(payload.items || []);
+        setError("");
+      } catch {
+        setItems([]);
+        setError("The catalog is temporarily unavailable right now.");
       } finally {
         setIsLoading(false);
       }
@@ -47,13 +58,17 @@ export const CigaretteCatalogPage = ({ search }: { search: string }) => {
             </h1>
           </div>
           <p className="text-sm text-sh-grey">
-            {isLoading ? "Loading entries..." : `${items.length} visible entries`}
+            {isLoading ? "Loading entries..." : error ? "Catalog unavailable" : `${items.length} visible entries`}
           </p>
         </div>
 
-        {!isLoading && !items.length && (
-          <p className="text-sh-grey">No catalog entries matched that search.</p>
-        )}
+        {error ? (
+          <p className="text-[#ff9789]">{error}</p>
+        ) : !isLoading && !items.length ? (
+          <p className="text-sh-grey">
+            {search ? "No cigarettes matched that search." : "The catalog is being prepared."}
+          </p>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => (
@@ -65,4 +80,3 @@ export const CigaretteCatalogPage = ({ search }: { search: string }) => {
     </>
   );
 };
-

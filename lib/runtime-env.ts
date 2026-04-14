@@ -20,7 +20,13 @@ export const getMissingServerEnv = () =>
   serverEnvNames.filter((name) => !process.env[name]);
 
 export const getAppUrl = () => {
-  const raw = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "";
+  const raw =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    process.env.URL ||
+    process.env.DEPLOY_PRIME_URL ||
+    "";
+
   if (!raw) {
     return "http://localhost:3000";
   }
@@ -31,4 +37,3 @@ export const getAppUrl = () => {
     return "http://localhost:3000";
   }
 };
-
