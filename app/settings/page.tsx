@@ -1,119 +1,100 @@
 "use client";
-import { Footer } from "app/components/Navigation/Footer";
-import { LayoutNavbar } from "app/components/Navigation/LayoutNavbar";
-import { User } from "app/types";
-import { updateProfile } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { LayoutNavbar } from "../components/Navigation/LayoutNavbar";
+import { Footer } from "../components/Navigation/Footer";
+import { useAppAuth } from "../components/Auth/AppAuthProvider";
 
-import React, { useEffect, useState } from "react";
-import { auth, db } from "app/firebase/firebase";
-
-export default function Page() {
+export default function SettingsPage() {
   const router = useRouter();
-
-  const [name, setName] = useState("");
+  const { profile, isLoading, authenticatedFetch, refreshProfile } = useAppAuth();
+  const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const [newUserName, setNewUserName] = useState("");
+  useEffect(() => {
+    if (!isLoading && !profile) {
+      router.replace("/auth");
+    }
 
-  function navigateToProfile() {
-    if (!auth.currentUser) return;
+    if (profile) {
+      setDisplayName(profile.displayName);
+      setBio(profile.bio || "");
+    }
+  }, [profile, isLoading, router]);
 
-    router.push("/profile/" + auth.currentUser.uid);
-  }
+  const onSave = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setMessage("");
 
-  function onSave() {
-    if (!auth.currentUser) return;
-
-    updateProfile(auth.currentUser, { displayName: name })
-      .then(() => {
-        updateFirestoreUser(auth.currentUser!.uid);
-        initSettingsForm();
-      })
-      .catch((err) => {
-        console.error("Error while updating profile:", err);
+    try {
+      const response = await authenticatedFetch("/api/account", {
+        method: "PATCH",
+        body: JSON.stringify({
+          displayName,
+          bio,
+        }),
       });
-  }
 
-  const updateFirestoreUser = async (id: string) => {
-    const userSnap = doc(db, "users", id);
-    await updateDoc(userSnap, { name, bio });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Could not update the profile.");
+      }
 
-    onProfileSaved();
-  };
-
-  // trigger name change in navbar
-  const onProfileSaved = () => {
-    setNewUserName(name);
-  };
-
-  const initSettingsForm = async () => {
-    if (!auth.currentUser) return;
-
-    const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-    if (userDoc.exists()) {
-      const user = userDoc.data() as User;
-      setName(user.name);
-      setBio(user.bio);
+      await refreshProfile();
+      setMessage("Profile updated.");
+    } catch (error) {
+      setError((error as Error).message);
     }
   };
 
-  useEffect(() => {
-    initSettingsForm();
-  }, [auth.currentUser, auth]);
-
   return (
     <>
-      <LayoutNavbar newUserName={newUserName} />
-      <div className="flex min-h-[80vh] flex-col items-center justify-start py-5 md:mx-auto md:my-0 md:w-[950px]">
-        <h1 className="text-sh-grey text-center text-3xl">Settings</h1>
+      <LayoutNavbar />
+      <main className="mx-auto min-h-[80vh] max-w-[760px] px-4 py-10">
+        <div className="mb-6">
+          <p className="graphik text-xs font-semibold uppercase tracking-[0.24em] text-sh-grey">
+            Settings
+          </p>
+          <h1 className="tiempos mt-2 text-4xl text-p-white">Update your profile</h1>
+        </div>
 
-        <form className="flex w-1/2 flex-col gap-6">
-          <fieldset className="w-full">
-            <legend className="border-b-grey text-sh-grey mb-3 w-full cursor-default border-b border-solid text-base">
-              Change your username
-            </legend>
+        <form onSubmit={onSave} className="space-y-5 rounded-2xl border border-b-grey bg-review-bg/70 p-6">
+          <label className="block">
+            <span className="mb-2 block text-sm text-sh-grey">Display name</span>
             <input
-              value={name}
-              type="text"
-              className="w-full rounded-md p-2 text-lg outline-none"
-              onChange={(e) => setName(e.target.value)}
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              className="h-11 w-full rounded-md border border-b-grey bg-input-bg px-3 text-p-white outline-none focus:border-hov-blue"
             />
-          </fieldset>
+          </label>
 
-          <fieldset className="w-full">
-            <legend className="border-b-grey text-sh-grey mb-3 w-full cursor-default border-b border-solid text-base">
-              Change your bio
-            </legend>
-
+          <label className="block">
+            <span className="mb-2 block text-sm text-sh-grey">Bio</span>
             <textarea
               value={bio}
-              className="w-full rounded-md p-2 text-lg outline-none"
-              onChange={(e) => setBio(e.target.value)}
+              onChange={(event) => setBio(event.target.value)}
+              rows={7}
+              className="w-full rounded-md border border-b-grey bg-input-bg px-3 py-3 text-p-white outline-none focus:border-hov-blue"
             />
-          </fieldset>
-        </form>
+          </label>
 
-        <div className="mt-10 flex items-center justify-center gap-4">
+          {message && <p className="text-sm text-[#7cf7a4]">{message}</p>}
+          {error && <p className="text-sm text-[#ff9789]">{error}</p>}
+
           <button
-            className="sans-serif text-p-white bg-b-green rounded px-3 py-2 text-xs font-bold"
-            onClick={onSave}
+            type="submit"
+            className="graphik rounded-full bg-b-green px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-si-black"
           >
-            {" "}
             Save profile
           </button>
-          <button
-            className="sans-serif text-p-white rounded bg-[#567] px-3 py-2 text-xs font-bold"
-            onClick={navigateToProfile}
-          >
-            Go back to profile
-          </button>
-          {/* <button onClick={updatePFP}>Update Avatar</button> */}
-        </div>
-      </div>
-
+        </form>
+      </main>
       <Footer />
     </>
   );
 }
+

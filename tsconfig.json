@@ -26,6 +26,9 @@
     "strictNullChecks": true,
     "baseUrl": "",
     "paths": {
+      "@/*": [
+        "*"
+      ],
       "@/assets/*": [
         "assets/*"
       ],

@@ -1,58 +1,39 @@
-import React from "react";
-
-import footerLinksData from "./footerLinks";
-import socialLinksData from "./socialLinks";
 import Link from "next/link";
 
 export const Footer = () => {
-  const footerLinks = footerLinksData;
-  const socials = socialLinksData;
-
   return (
-    <footer className="bg-navigation-bg relative">
-      <div className="flex flex-col px-4 py-6 font-['Graphik'] md:mx-auto md:my-0 md:w-[950px] ">
-        <nav className="mb-3 flex items-center justify-between">
-          <ul className=" grid grid-cols-3 py-1  md:flex">
-            {footerLinks.map((link) => (
-              <li key={link.id}>
-                <p className="text-s text-sh-grey hover:text-p-white mr-2 font-bold hover:cursor-pointer">
-                  {link.name}
-                </p>
-              </li>
-            ))}
-          </ul>
-
-          <ul className=" sans-serif hidden flex-col items-center justify-between gap-2 py-1 md:flex  md:flex-row  md:gap-0">
-            {socials.map((social) => (
-              <li className="self-center" key={social.id}>
-                <Link href={social.link}>
-                  <svg
-                    width={social.width}
-                    height={social.height}
-                    fill="#9ab"
-                    className="mr-2"
-                  >
-                    <path d={social.path}></path>
-                  </svg>
-                  <span className="hidden">{social.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <p className="text-sh-grey pb-3 text-xs">
-          © Clonnerboxd Limited. Made by{" "}
-          <a className="underline" href="https://github.com/JanaIsCoding">
-            JanaIsCoding
-          </a>
-          . Film data from{" "}
-          <a className="underline" href="https://www.themoviedb.org/">
-            TMDb
-          </a>
-          . Inspired by{" "}
+    <footer className="border-t border-b-grey bg-navigation-bg">
+      <div className="mx-auto flex max-w-[1080px] flex-col gap-4 px-4 py-8">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="graphik text-xs font-semibold uppercase tracking-[0.24em] text-sh-grey">
+              CIGARBOXXD
+            </p>
+            <p className="mt-2 max-w-[720px] text-sm text-l-white">
+              Community reviews and cataloging for legally marketed cigarettes. No sales, no marketplace, no checkout.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-4 text-sm text-sh-grey">
+            <Link href="/" className="hover:text-p-white">
+              Home
+            </Link>
+            <Link href="/cigarettes" className="hover:text-p-white">
+              Catalog
+            </Link>
+            <Link href="/reviews" className="hover:text-p-white">
+              Reviews
+            </Link>
+            <Link href="/members" className="hover:text-p-white">
+              Members
+            </Link>
+          </div>
+        </div>
+        <p className="text-xs leading-6 text-sh-grey">
+          FDA tobacco product catalog data can be seeded from the Searchable Tobacco Products Database. Image suggestions can be sourced from Openverse when licensing allows, but exact pack imagery still needs manual review for rights and accuracy. Inspired by{" "}
           <a className="underline" href="https://letterboxd.com/">
             Letterboxd
           </a>
+          .
         </p>
       </div>
     </footer>

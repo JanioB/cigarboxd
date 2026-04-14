@@ -8,6 +8,10 @@ export const SignOut = () => {
   const router = useRouter();
 
   const onSignOut = () => {
+    if (!auth) {
+      return;
+    }
+
     signOut(auth);
 
     // go back home, traveler

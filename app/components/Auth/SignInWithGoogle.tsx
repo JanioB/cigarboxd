@@ -10,13 +10,19 @@ import { auth, db } from "../../firebase/firebase";
 
 export const SignInWithGoogle = () => {
   const signInWithGoogle = async () => {
+    if (!auth || !db) {
+      return;
+    }
+
+    const authInstance = auth;
+    const dbInstance = db;
     let provider = new GoogleAuthProvider();
 
-    await signInWithPopup(auth, provider)
+    await signInWithPopup(authInstance, provider)
       .then(async () => {
         // verify if user exists in firestore db
         const userDoc = await getDoc(
-          doc(db, "users/" + auth?.currentUser?.uid)
+          doc(dbInstance, "users/" + authInstance?.currentUser?.uid)
         );
 
         // create a new doc reference for the new user
@@ -36,13 +42,18 @@ export const SignInWithGoogle = () => {
   };
 
   const addNewUserToDB = async () => {
-    if (!auth.currentUser) return;
+    if (!auth || !db || !auth.currentUser) return;
 
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-      name: auth.currentUser.displayName,
-      uid: auth.currentUser.uid,
+    const authInstance = auth;
+    const dbInstance = db;
+    const currentUser = authInstance.currentUser;
+    if (!currentUser) return;
+
+    await setDoc(doc(dbInstance, "users", currentUser.uid), {
+      name: currentUser.displayName,
+      uid: currentUser.uid,
       bio: "My movie watching journey, on clonnerboxd :)",
-      photoUrl: auth.currentUser.photoURL,
+      photoUrl: currentUser.photoURL,
       reviews: [],
       watched: [],
       favourites: [],

@@ -1,67 +1,82 @@
 "use client";
 
-import { Footer } from "app/components/Navigation/Footer";
-import { LayoutNavbar } from "app/components/Navigation/LayoutNavbar";
-import { UserCard } from "app/components/User/UserCard";
-import { User } from "app/types";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { LayoutNavbar } from "../components/Navigation/LayoutNavbar";
+import { Footer } from "../components/Navigation/Footer";
 
-import { collection, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { db } from "app/firebase/firebase";
+type PublicUser = {
+  uid: string;
+  displayName: string;
+  bio: string;
+  reviewCount: number;
+  favoritesCount: number;
+  triedCount: number;
+  role: string;
+};
 
-// @to-do infinite scrolling
-// @to-do sort by most watches, most favs, etc..
-export default function Page() {
-  const [users, setUsers] = useState<User[]>([]);
+export default function MembersPage() {
+  const [items, setItems] = useState<PublicUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAllUsers = async () => {
-    const userDocs = await getDocs(collection(db, "users"));
-    const users = userDocs.docs.map((doc) => doc.data()) as User[];
-
-    const sorted = users.sort((a, b) => {
-      if (a.name.includes("Jana")) return -1;
-      if (b.name.includes("Jana")) return 1;
-
-      return 1;
-    });
-
-    setUsers(sorted);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    fetchAllUsers();
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/users", { cache: "no-store" });
+        const payload = await response.json();
+        setItems(payload.items || []);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   return (
     <>
       <LayoutNavbar />
-      <div className="site-body min-h-[80vh] py-5">
-        <div className="flex flex-col px-4 font-['Graphik'] md:mx-auto md:my-0 md:w-[950px]">
-          <div className="section-heading border-b-grey text-sh-grey mb-3 flex justify-between border-b border-solid text-xs">
-            <p>MEMBERS OF CLONNERBOXD</p>
-            {users.length > 0 && <p>{users.length} total members</p>}
+      <main className="mx-auto min-h-[80vh] max-w-[1080px] px-4 py-10">
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="graphik text-xs font-semibold uppercase tracking-[0.24em] text-sh-grey">
+              Members
+            </p>
+            <h1 className="tiempos mt-2 text-4xl text-p-white">Active accounts and collectors</h1>
           </div>
-          {isLoading && <p>Loading users...</p>}
-
-          {!isLoading && !users.length && (
-            <p>No users yet, login to be the first!</p>
-          )}
-
-          {!isLoading &&
-            users.length &&
-            users.map((user, i) => (
-              <div
-                key={i}
-                className="users__wrapper text-sh-grey border-b-grey flex flex-col border-b border-solid text-xs"
-              >
-                <UserCard user={user} />
-              </div>
-            ))}
+          <p className="text-sm text-sh-grey">
+            {isLoading ? "Loading members..." : `${items.length} visible members`}
+          </p>
         </div>
-      </div>
 
+        <div className="grid gap-4 md:grid-cols-2">
+          {items.map((user) => (
+            <Link
+              key={user.uid}
+              href={`/profile/${user.uid}`}
+              className="rounded-2xl border border-b-grey bg-review-bg/70 p-5 hover:border-hov-blue"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="tiempos text-2xl text-p-white">{user.displayName}</p>
+                  <p className="mt-2 max-w-[42ch] text-sm leading-6 text-l-white">
+                    {user.bio || "No public bio yet."}
+                  </p>
+                </div>
+                <span className="graphik rounded-full border border-b-grey px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-sh-grey">
+                  {user.role}
+                </span>
+              </div>
+              <div className="mt-4 flex gap-5 text-sm text-sh-grey">
+                <span>{user.reviewCount} reviews</span>
+                <span>{user.favoritesCount} favorites</span>
+                <span>{user.triedCount} tried</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </main>
       <Footer />
     </>
   );

@@ -3,27 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@opentelemetry/api": "^1.9.1",
     "@vercel/analytics": "^1.5.0",
-    "firebase": "^9.21.0",
+    "firebase": "^12.12.0",
+    "firebase-admin": "^13.8.0",
     "moment": "^2.30.1",
-    "next": "^15.2.0",
+    "next": "^15.5.15",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
-    "web-vitals": "^2.1.4"
+    "zod": "^4.3.6"
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "build": "next build",
+    "start": "next start -H 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "validate:env": "node scripts/validate-runtime-config.mjs",
+    "seed:fda": "node --env-file=.env.local scripts/seed-fda-cigarettes.mjs"
   },
   "browserslist": {
     "production": [

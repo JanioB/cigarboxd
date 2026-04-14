@@ -4,6 +4,10 @@ import { auth } from "../../firebase/firebase";
 
 export const SignInWithDemo = () => {
   const signInWithDemoAccount = async () => {
+    if (!auth) {
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(
         auth,
